@@ -9,11 +9,13 @@
   <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-database.js"></script>
-  <script src="firebase/firebase-init.js"></script>
   <script src="https://cdn.firebase.com/libs/firebaseui/2.3.0/firebaseui.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.3.0/firebaseui.css" />
   <script src="http://kendo.cdn.telerik.com/2017.2.621/js/kendo.all.min.js"></script>
   <link type="text/css" rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.2.621/styles/kendo.common.min.css"/>
+
+  <script src="firebase/firebase-init.js"></script>
+  <script src="firebase/kendo.firebase.js"></script>
 
   <script type="text/javascript">
 
@@ -38,14 +40,20 @@
       return df.promise();
     }
 
-    function ytk_songlist(songs) {
+    function ytk_songlist(user) {
       let grid = $('#ytk-songs').find('.grid').kendoGrid({
         columns: [
           {field:'v', title:'vid'},
           {field:'t', title:'title'},
           {field:'a', title:'artist'}],
-        dataSource: { data: songs },
-        editable: true
+        dataSource: {
+          autoSync: true,
+          schema: { model:{ id:'v'}},
+          type:'firebase',
+          transport:{
+            firebase:{ ref:'/u/' + user.uid }}},
+        editable: true,
+        toolbar: ['create', 'save', 'cancel']
       }).data('kendoGrid');
 
       // make the grid rows sortable
@@ -71,14 +79,7 @@
       });
     }
 
-    function ytk_init(user){
-      firebase.database().ref('/users/' + user.uid).once('value', data=>{
-        console.log(['value:', data.val()]);
-        ytk_songlist(data.val());
-      });
-    }
-
-    $(() => ensure_user().then(ytk_init));
+    $(() => ensure_user().then(ytk_songlist));
 
   </script>
 </head>
