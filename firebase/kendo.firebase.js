@@ -31,14 +31,12 @@ SOFTWARE.
       this.requestId = kendo.guid();
 
       var fbRef = this.ref.push(data, function (error) {
-        if (error) {
-          options.fail();
-        }
+        if (error) options.fail();
       });
 
       if (fbRef !== undefined) {
         var result = data;
-        result.id = fbRef.name();
+        result.id = fbRef.getKey();
         options.success(result);
         delete this.requestId;
       }
@@ -58,14 +56,10 @@ SOFTWARE.
     },
 
     init: function (options) {
-      var firebase = options && options.firebase ? options.firebase : {};
-
-      var url = firebase.url;
-      if (!url) {
-        throw new Error('The option, URL must be set.');
-      }
-
-      this.ref = new Firebase(url);
+      let fbOpt = options && options.firebase ? options.firebase : {},
+          ref = fbOpt.ref;
+      if (!ref) throw new Error('The firebase.ref option must be set.');
+      this.ref = firebase.database().ref(ref);
       kendo.data.RemoteTransport.fn.init.call(this, options);
     },
 
@@ -75,25 +69,25 @@ SOFTWARE.
           return;
         }
         var model = childSnapshot.val();
-        model.id = childSnapshot.name();
+        model.id = childSnapshot.key;
         callbacks.pushUpdate(model);
       }, function() {}, this);
 
       this.ref.on('child_changed', function (childSnapshot, prevChildName) {
         var model = childSnapshot.val();
-        model.id = childSnapshot.name();
+        model.id = childSnapshot.key;
         callbacks.pushUpdate(model);
       });
 
       this.ref.on('child_moved', function (childSnapshot, prevChildName) {
         var model = childSnapshot.val();
-        model.id = childSnapshot.name();
+        model.id = childSnapshot.key;
         callbacks.pushUpdate(model);
       });
 
       this.ref.on('child_removed', function (oldChildSnapshot) {
         var model = oldChildSnapshot.val();
-        model.id = oldChildSnapshot.name();
+        model.id = oldChildSnapshot.key;
         callbacks.pushDestroy(model);
       });
     },
@@ -103,7 +97,7 @@ SOFTWARE.
         var data = [];
         dataSnapshot.forEach(function (childSnapshot) {
           var item = childSnapshot.val();
-          item.id = childSnapshot.name();
+          item.id = childSnapshot.key;
           data.push(item);
         });
         options.success(data);
