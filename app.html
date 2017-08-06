@@ -4,38 +4,90 @@
   <meta charset="UTF-8">
   <title>yt-jukebox</title>
   <script src="http://code.jquery.com/jquery-3.2.1.min.js"
-    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="></script>
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
   <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase-database.js"></script>
   <script src="firebase/firebase-init.js"></script>
   <script src="https://cdn.firebase.com/libs/firebaseui/2.3.0/firebaseui.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.3.0/firebaseui.css" />
+  <script src="http://kendo.cdn.telerik.com/2017.2.621/js/kendo.all.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.2.621/styles/kendo.common.min.css"/>
+
   <script type="text/javascript">
 
     function ensure_user() {
+      let df = $.Deferred();
       firebase.auth().onAuthStateChanged(function (user) {
-        if (user) $('#user-info').html('logged in as: ' + user.displayName);
-        else {
-          var ui = new firebaseui.auth.AuthUI(firebase.auth());
+        if (user) {
+          $('#user-info').html('logged in as: ' + user.displayName);
+          df.resolve(user);
+        } else {
+          let ui = new firebaseui.auth.AuthUI(firebase.auth());
           ui.start('#firebaseui-auth-container', {
             signInSuccessUrl: 'app.html',
             signInOptions: [
               firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-              firebase.auth.EmailAuthProvider.PROVIDER_ID,
+              firebase.auth.EmailAuthProvider.PROVIDER_ID
             ],
             tosUrl: 'TODO'
           });
         }
       });
+      return df.promise();
     }
 
-    window.addEventListener('load', ensure_user);
+    function ytk_songlist(songs) {
+      let grid = $('#ytk-songs').find('.grid').kendoGrid({
+        columns: [
+          {field:'v', title:'vid'},
+          {field:'t', title:'title'},
+          {field:'a', title:'artist'}],
+        dataSource: { data: songs },
+        editable: true
+      }).data('kendoGrid');
+
+      // make the grid rows sortable
+      grid.table.kendoSortable({
+        filter: '>tbody >tr',
+        cursor: 'move',
+        hint: function(elem){
+          return $('<table class="k-grid k-widget"></table>')
+            .append(elem.clone())
+            .css({width: '640px', opacity: 0.7});
+        },
+        placeholder: function(elem) {
+          let result = $('<tr class="placeholder"><td colspan="4"></td></tr>');
+          result.find('td').css({"border-bottom": 'dashed silver 2px'});
+          return result;
+        },
+        change: function(e){
+          let skip = 0, // grid.dataSource.skip(),
+              item = grid.dataSource.getByUid(e.item.data('uid'));
+          grid.dataSource.remove(item);
+          grid.dataSource.insert(e.newIndex + skip, item);
+        }
+      });
+    }
+
+    function ytk_init(user){
+      firebase.database().ref('/users/' + user.uid).once('value', data=>{
+        console.log(['value:', data.val()]);
+        ytk_songlist(data.val());
+      });
+    }
+
+    $(() => ensure_user().then(ytk_init));
 
   </script>
 </head>
 <body>
   <div id="firebaseui-auth-container"></div>
   <div id="user-info">not logged in</div>
+  <section id="ytk-songs">
+    <h1>my songs</h1>
+    <div class="grid"></div>
+  </section>
 </body>
 </html>
