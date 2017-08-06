@@ -9,7 +9,7 @@
       margin: 0; padding: 0; overflow: hidden;
     }
   </style>
-  <script src="https://www.youtube.com/player_api"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -19,13 +19,13 @@
 <script>
   var player;
   var queue = [
-    {vid:'XTEJPNQB1Y0'},       // istanbul - tmbg
-    {vid:'Jo7G5_g3dTc'}       // the promise - when in rome
+    {vid:'reioMq_5xXk'},     // survivor - high on you
+    {vid:'-8Uu9Pn4Y2o'}      // survivor - i can't hold back
   ];
 
   function cueNextSong() {
     var next;
-    if (next = queue.shift()) player.cueVideoById(next.vid);
+    if (next = queue.shift()) player.cueVideoById(next.vid, 0, 'large');
     else alert("nothing more to play.");
   }
 
@@ -58,7 +58,7 @@
   }
 
   // called by the youtube script to kick everything off:
-  function onYouTubePlayerAPIReady() {
+  function onYouTubeIframeAPIReady() {
     console.log("API ready.");
     player = new YT.Player('yt-player', {
       height: window.innerHeight,
