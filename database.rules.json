@@ -1,6 +1,16 @@
 {
   "rules": {
     ".read": "auth != null",
-    ".write": "auth != null"
+    ".write": "auth != null",
+    "u": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        ".validate": "newData.hasChildren(['v','a','t'])",
+        "v": { ".validate": "newData.val() !== ''" },
+        "a": { },
+        "t": { }
+      }
+    }
   }
 }
