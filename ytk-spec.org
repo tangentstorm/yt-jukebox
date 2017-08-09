@@ -1,0 +1,36 @@
+
+* MILESTONE: "karaoke night"
+- [ ] public interface
+    - [ ] users can add name,artist,song
+- [ ] kj interface
+    - [ ] kj can manually rearrange the queue
+    - [ ] the list tracks which ones have been played
+- [ ] player system
+    - we can't host our own page because most karaoke content won't let the iframe player play off of any site except youtube.com.
+    - so: we need to inject some javascript into our own browser on youtube.com.
+      - easy: run a script manually in the console
+      - chrome user script
+      - install as chrome extension?
+
+
+
+* MILESTONE: "power users":
+  - [ ] give users the ability to manage their list of favorite songs.
+  - [ ] users can submit a song to the queue
+     (youtube link, artist, their name)
+
+
+
+
+* misc notes
+
+** things to do in the js console on youtube.com
+
+#+begin_src js
+   $('.ytp-fullscreen-button').click()
+   ref = document.getElementById('movie_player');
+   ref.addEventListener('onStateChange', e=>console.log(['state changed!', e]))
+   ref.cueVideoById('')
+   ref.playVideo()
+#+end_src
+
