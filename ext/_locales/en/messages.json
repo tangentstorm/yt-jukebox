@@ -1,5 +1,8 @@
 {
-  "l10nTabName": {
+  "l10nGotoPlayer": {
+   "message": "you need to be on a video player page for this to work.\nGo to one?"
+  }
+  ,"l10nTabName": {
     "message":"Localization"
     ,"description":"name of the localization tab"
   }
