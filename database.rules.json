@@ -2,6 +2,7 @@
   "rules": {
     ".read": "auth != null",
     ".write": "auth != null",
+    "v": { ".read": true },
     "u": {
       "$uid": {
         ".read": "$uid === auth.uid",

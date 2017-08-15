@@ -15,10 +15,13 @@
 // this function will be called by event.js if the user clicks
 // our icon while on a player page.
 function inject_player(){
-  let s = document.createElement('script');
-  s.src = chrome.extension.getURL('src/player.js');
-  s.onload = function(){ this.remove(); };
-  document.head.appendChild(s);
+
+  ['src/fire-config.js', 'src/player.js'].forEach(url => {
+    let s = document.createElement('script');
+    s.src = chrome.extension.getURL(url);
+    s.onload = function(){ this.remove(); };
+    document.head.appendChild(s);
+  });
 
   // oddly, we're not allowed to do this one line from the injected script,
   // because full screen has to be initiated by an actual user action.

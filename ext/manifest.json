@@ -26,5 +26,5 @@
     "js": ["src/inject.js"],
     "run_at": "document_end"
   }],
-  "web_accessible_resources": ["src/player.js"]
+  "web_accessible_resources": ["src/fire-config.js", "src/player.js"]
 }
