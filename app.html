@@ -16,16 +16,40 @@
 
   <script src="firebase/firebase-init.js"></script>
   <script src="firebase/kendo.firebase.js"></script>
+  <style type="text/css">
+    #song-request div { padding-bottom: 5px; }
+    #song-request label { display: inline-block; width: 150px; break-after: right }
+    #song-request input { width: 250px; }
+  </style>
 
   <script type="text/javascript">
+
+    function logout(){
+      firebase.auth().signOut().then(function(){
+        $("#logged-in").hide();
+        $("#logged-out").show();
+      },
+      function (){
+        // error case. not sure what to do, so...
+        alert('logout failed. maybe try refreshing the page?');
+      })
+    }
+
+    function request_song(){
+      let form = document.forms["song-request"];
+      return false;
+    }
 
     function ensure_user() {
       let df = $.Deferred();
       firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-          $('#user-info').html('logged in as: ' + user.displayName);
+          $("#logged-in").show().find(".username").text(user.displayName);
+          $("#logged-out").hide();
           df.resolve(user);
         } else {
+          $("#logged-in").hide();
+          $("#logged-out").show();
           let ui = new firebaseui.auth.AuthUI(firebase.auth());
           ui.start('#firebaseui-auth-container', {
             signInSuccessUrl: 'app.html',
@@ -85,9 +109,36 @@
 </head>
 <body>
   <div id="firebaseui-auth-container"></div>
-  <div id="user-info">not logged in</div>
+  <div id="logged-out">not logged in</div>
+  <div id="logged-in">
+    logged in as <span class="username">(user)</span>.
+    <a href="#" onclick="logout();">log out</a>
+  </div>
   <section id="ytk-songs">
-    <h1>my songs</h1>
+    <h1>Request a Song</h1>
+    <form id="song-request" onsubmit="return request_song();">
+      <div>
+        <label for="singer">Who's singing?</label>
+        <input id="singer"/>
+      </div>
+      <div>
+        <label for="title">Song Title:</label>
+        <input id="title"/>
+      </div>
+      <div>
+        <label for="artist">Song Artist:</label>
+        <input id="artist"/>
+      </div>
+      <div>
+        <label for="link">Youtube Video Link</label>
+        <input id="link"/>
+      </div>
+      <div>
+        <label><!-- just for padding --></label>
+        <button>request</button>
+      </div>
+    </form>
+    <h1>song list</h1>
     <div class="grid"></div>
   </section>
 </body>
