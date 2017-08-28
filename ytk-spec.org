@@ -1,17 +1,37 @@
 
 * MILESTONE: "karaoke night"
 - [ ] public interface
-    - [ ] users can add name,artist,song
+    - [ ] users can see the queue of songs for the night
+    - [ ] indicate the currently playing and next songs
+    - [ ] users can add request as (name,artist,song,video link)
+    - [ ] newly created songs appear at the end of the queue
 - [ ] kj interface
+    - [ ] create a karaoke night with a nickname
+    - [ ] show everything in the public interface
     - [ ] kj can manually rearrange the queue
-    - [ ] the list tracks which ones have been played
-- [ ] player system
+    - [ ] interface to remotely control the player
+        - [ ] pause player
+        - [ ] stop player
+        - [ ] start the player
+        - [ ] restart song
+        - [ ] jump to time
+- [ ] video player
+  - [X] play videos at all
     - we can't host our own page because most karaoke content won't let the iframe player play off of any site except youtube.com.
     - so: we need to inject some javascript into our own browser on youtube.com.
       - easy: run a script manually in the console
       - chrome user script
       - install as chrome extension?
-
+  - [ ] play from a queue
+    - [ ] provide an interface for connecting to the queue
+    - [ ] when song starts, mark it as playing
+    - [ ] when song ends, mark it as played
+    - [ ] select next song to play from the queue, or stop if empty.
+    - [ ] monitor a "command" variable for changes (stop/play/etc)
+    - [ ] on "play" command, continue playing or play first unplayed song
+    - [ ] on "pause", pause/unpause video
+    - [ ] on "jump", jump to time (restart is just a jump to 0:00)
+    - [ ] on "stop", stop the playback
 
 
 * MILESTONE: "power users":
