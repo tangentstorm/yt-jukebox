@@ -24,10 +24,14 @@
 
   <script type="text/javascript">
 
+    function toggleUserStuff(loggedIn) {
+      $(".logged-out").toggle(!loggedIn);
+      return $(".logged-in").toggle(loggedIn);
+    }
+
     function logout(){
       firebase.auth().signOut().then(function(){
-        $("#logged-in").hide();
-        $("#logged-out").show();
+        toggleUserStuff(false);
       },
       function (){
         // error case. not sure what to do, so...
@@ -35,8 +39,39 @@
       })
     }
 
+    // validate the song request form and submit to firebase
     function request_song(){
-      let form = document.forms["song-request"];
+      function fail(reason){ alert(reason); return false; }
+
+      let vid = "",
+          form = document.forms["song-request"];
+      const fields = ["singer", "link", "title", "artist"];
+
+      for (let i=0; i<fields.length; i++) {
+        if (!form[fields[i]].value) return fail('missing required field: '+fields[i]);
+      }
+
+      try { vid = new URL(form['link'].value).searchParams.get('v'); }
+      catch(e){ return fail('please use a youtube video link with v=XXXX in the query string.'); }
+
+      if (vid.length!==11) return fail("video link contains an invalid video id.");
+
+      $(form).find("button").prop("disabled", true);
+
+      let request = {
+        singer: form['singer'].value,
+        title: form['title'].value,
+        artist: form['artist'].value,
+        vid: vid};
+
+      let qRef = '/q'; // where to put the queue
+      let key = firebase.database().ref(qRef).push().key,
+          ups = {};
+      ups[qRef+'/'+key] = request;
+      firebase.database().ref().update(ups).then(function(){
+        form.reset();
+        $(form).find("button").prop("disabled", false);
+      });
       return false;
     }
 
@@ -44,12 +79,10 @@
       let df = $.Deferred();
       firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-          $("#logged-in").show().find(".username").text(user.displayName);
-          $("#logged-out").hide();
+          toggleUserStuff(true).find(".username").text(user.displayName);
           df.resolve(user);
         } else {
-          $("#logged-in").hide();
-          $("#logged-out").show();
+          toggleUserStuff(false);
           let ui = new firebaseui.auth.AuthUI(firebase.auth());
           ui.start('#firebaseui-auth-container', {
             signInSuccessUrl: 'app.html',
@@ -109,17 +142,21 @@
 </head>
 <body>
   <div id="firebaseui-auth-container"></div>
-  <div id="logged-out">not logged in</div>
-  <div id="logged-in">
+  <div class="logged-out">not logged in</div>
+  <div class="logged-in">
     logged in as <span class="username">(user)</span>.
     <a href="#" onclick="logout();">log out</a>
   </div>
-  <section id="ytk-songs">
+  <section id="ytk-request">
     <h1>Request a Song</h1>
     <form id="song-request" onsubmit="return request_song();">
       <div>
         <label for="singer">Who's singing?</label>
         <input id="singer"/>
+      </div>
+      <div>
+        <label for="link">Youtube Video Link</label>
+        <input id="link"/>
       </div>
       <div>
         <label for="title">Song Title:</label>
@@ -130,14 +167,12 @@
         <input id="artist"/>
       </div>
       <div>
-        <label for="link">Youtube Video Link</label>
-        <input id="link"/>
-      </div>
-      <div>
         <label><!-- just for padding --></label>
         <button>request</button>
       </div>
     </form>
+  </section>
+  <section id="ytk-songs" class="logged-in">
     <h1>song list</h1>
     <div class="grid"></div>
   </section>
